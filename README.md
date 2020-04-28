@@ -22,6 +22,7 @@ You'll need python3, grpcio, grpcio-tools, numpy and scipy to execute various pa
 * memcached
     * Requires `memcached` and `memaslap` to be installed and available in your $PATH environment.
 * stream
+    * Change directory to stream and type make
 
 ## Setting up cgroups
 ### Disable cgroup v1
