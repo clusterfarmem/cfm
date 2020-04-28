@@ -1,0 +1,4 @@
+[submodule "tensorflow/benchmarks"]
+	path = tensorflow/benchmarks
+	url = https://github.com/tensorflow/benchmarks.git
+	branch = cnn_tf_v1.14_compatible
