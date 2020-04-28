@@ -159,6 +159,8 @@ mem | 8192 (8192 = 8GB) | Each `server.py` instance can use a total of 8GB of lo
 --until | 30 | Each of the 30 workloads will have a random arrival time between 0 and 30 seconds
 --start_burst | 2 | The first 2 workloads in the schedule will have their arrival times modified to be 0. This causes them to arrive immediately. 
 
-# Further Reading
+## Further reading
 For more information, please refer to our [paper](https://dl.acm.org/doi/abs/10.1145/3342195.3387522) accepted at [EUROSYS 2020](https://www.eurosys2020.org/)
 
+## Questions
+For additional questions please contact us at cfm@lists.eecs.berkeley.edu
