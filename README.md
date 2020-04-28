@@ -1,21 +1,27 @@
 # Setup and pre-requisites
 
-On the client node the fastswap kernel and driver must be loaded, on the far memory node, the server binary (`rmserver`) must be running. Please see https://github.com/clusterfarmem/fastswap for more details.
+On the client node the fastswap kernel and driver must be loaded. On the far memory node the server binary `rmserver` must be running. Please see https://github.com/clusterfarmem/fastswap for more details.
 
-Other software pre-requisites:
+## General pre-requisites
 
-Tool | Source
-------|-------
-grpcio | pip
-grpcio-tools | pip
-tensorflow 1.14.0 | Build from source or pip
-numpy | pip
-scipy | pip
-sklearn | pip
+You'll need python3, grpcio, grpcio-tools, numpy and scipy to execute various parts of our framework. Please make sure your python environment can see these modules.
 
-## git submodules
-After cloning this repository, run the following command to get the submodules that we used
-    git submodule update --init
+## Workload setup (for single and multi-workload benchmarks)
+
+* quicksort
+    * Change directory to quicksort and type make
+* linpack
+    * No setup required, but most likely you'll need an Intel CPU
+* tf-inception
+    * tensorflow 1.14 is required
+    * Init submodules `git submodule update --init`
+* spark
+    * We assume the user has installed [spark 2.4](https://archive.apache.org/dist/spark/spark-2.4.0/spark-2.4.0-bin-hadoop2.7.tgz) at `~/spark-2.4.0-bin-hadoop2.7`
+* kmeans
+    * Requires sklearn available in python3
+* memcached
+    * Requires `memcached` and `memaslap` to be installed and available in your $PATH environment.
+* stream
 
 ## Setting up cgroups
 ### Disable cgroup v1
@@ -28,27 +34,16 @@ After cloning this repository, run the following command to get the submodules t
 
 ### Enable cgroup v2
 The framework and scripts rely on the cgroup system to be mounted at /cgroup2. Perform the following actions:
-* Run `sudo mkdir /cgroup2` to create mount point
+* Run `sudo mkdir /cgroup2` to create root mount point
 * Execute `setup/init_bench_cgroups.sh`
     * Mounts cgroup system
     * Changes ownership of the mount point (and all nested files) to the current user
-    * Enables prefetching  
+    * Enables prefetching
 
 ## Protocol Buffers
 We use [the grpc framework](https://grpc.io) and [protocol buffers](https://developers.google.com/protocol-buffers/docs/pythontutorial) to communicate between the scheduler and servers. The messages that we've defined are in `protocol/protocol.proto`. To generate them the corresponding `.py` files, execute the following command in the `protocol` directory:
     
     source gen_protocol.sh
-
-## Preinstalled Workloads (for single and multi-workload benchmarks)
-* quicksort
-* linpack
-* tf-inception
-* spark
-* kmeans
-* memaslap
-* stream
-
-Note: For the `spark` workload, we assume the user has installed [spark 2.4](https://archive.apache.org/dist/spark/spark-2.4.0/spark-2.4.0-bin-hadoop2.7.tgz) at `~/spark-2.4.0-bin-hadoop2.7`
 
 # Single Workload Benchmarks
 ## `benchmark.py`
@@ -78,10 +73,6 @@ ratio | The portion of the workload's resident set size that you want to keep in
 
 ## Adding Additional Workloads
 New workloads can be added by modifying the workload_choices variable in `benchmark.py` and creating a new class for it in `lib/workloads.py`. 
-
-
-<br/>
-<br/>
 
 # Multi-workload Benchmarks
 
@@ -130,8 +121,6 @@ mem | 8192 (8192 = 8GB) | The `server.py` instance can use a total of 8GB of loc
 --until | 30 | Each of the 30 workloads will have a random arrival time between 0 and 30 seconds
 --optimal | Set | The `server.py` and `scheduler.py` will use the optimal shrinking policy. Setting this precludes using both `--uniform_ratio` and `--variable_ratios`
 
-</br></br>
-
     ./scheduler.py 123 192.168.0.1:50051 8 8192 -r --size 100 --workload quicksort,kmeans,linpack --ratios 3:1:1 --until 30 --variable_ratios 0.5,0.6,0.7 --until 30
 
 Parameter            | Value | Explanation
@@ -147,8 +136,6 @@ mem | 8192 (8192 = 8GB) | The `server.py` instance can use a total of 8GB of loc
 --ratios | 3:1:1 | The first, second, and third workloads in the comma-separated list passed to `--workload` constitute 60% (3/(3+1+1)), 20% (1/(3+1+1)), and 20% (1/(3+1+1)) of the 100 workloads respectively. In this example, there will be 60 quicksorts, 20 kmeans, and 20 linpacks scheduled.
 --until | 30 | Each of the 30 workloads will have a random arrival time between 0 and 30 seconds
 --variable_ratios | 0.5,0.6,0.7 | The three workloads (quicksort, kmeans, and linpack) will have their minimum ratios set to 0.5, 0.6, and 0.7 respectively. `server.py` and `scheduler.py` will use the variable shrinking policy. Setting this precludes using both `--uniform_ratio` and `--optimal`
-
-</br></br>
 
     ./scheduler.py 123 192.168.0.1:50051,192.168.0.2:50051 8 8192 -r --size 250 --workload quicksort,kmeans,linpack --ratios 3:1:1 --until 20 --uniform_ratio 0.5 --until 30 --start_burst 2
 
@@ -168,5 +155,5 @@ mem | 8192 (8192 = 8GB) | Each `server.py` instance can use a total of 8GB of lo
 --start_burst | 2 | The first 2 workloads in the schedule will have their arrival times modified to be 0. This causes them to arrive immediately. 
 
 # Further Reading
-For more information, please refer to our [paper](https://dl.acm.org/doi/abs/10.1145/3342195.3387522) which was accepted at [EUROSYS 2020](https://www.eurosys2020.org/)!
+For more information, please refer to our [paper](https://dl.acm.org/doi/abs/10.1145/3342195.3387522) accepted at [EUROSYS 2020](https://www.eurosys2020.org/)
 
