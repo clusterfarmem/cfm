@@ -1,0 +1,53 @@
+#!/bin/bash
+#===============================================================================
+# Copyright 2001-2017 Intel Corporation All Rights Reserved.
+#
+# The source code,  information  and material  ("Material") contained  herein is
+# owned by Intel Corporation or its  suppliers or licensors,  and  title to such
+# Material remains with Intel  Corporation or its  suppliers or  licensors.  The
+# Material  contains  proprietary  information  of  Intel or  its suppliers  and
+# licensors.  The Material is protected by  worldwide copyright  laws and treaty
+# provisions.  No part  of  the  Material   may  be  used,  copied,  reproduced,
+# modified, published,  uploaded, posted, transmitted,  distributed or disclosed
+# in any way without Intel's prior express written permission.  No license under
+# any patent,  copyright or other  intellectual property rights  in the Material
+# is granted to  or  conferred  upon  you,  either   expressly,  by implication,
+# inducement,  estoppel  or  otherwise.  Any  license   under such  intellectual
+# property rights must be express and approved by Intel in writing.
+#
+# Unless otherwise agreed by Intel in writing,  you may not remove or alter this
+# notice or  any  other  notice   embedded  in  Materials  by  Intel  or Intel's
+# suppliers or licensors in any way.
+#===============================================================================
+
+echo "This is a SAMPLE run script for SMP LINPACK. Change it to reflect"
+echo "the correct number of CPUs/threads, problem input files, etc.."
+
+# Setting up affinity for better threading performance
+export KMP_AFFINITY=nowarnings,compact,1,0,granularity=fine
+#export MKL_NUM_THREADS=4
+#export OMP_NUM_THREADS=4
+#export MKL_DOMAIN_NUM_THREADS=4
+
+# Get Directory of Script
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
+# Use numactl for better performance on multi-socket machines.
+nnodes=`numactl -H 2>&1 | awk '/available:/ {print $2}'`
+cpucores=`cat /proc/cpuinfo | awk '/cpu cores/ {print $4; exit}'`
+
+if [  $nnodes -gt 1 -a $cpucores -gt 8 ]
+then
+    numacmd="numactl --interleave=all"
+else
+    numacmd=
+fi
+
+arch=xeon64
+{
+  date
+  /usr/bin/time -v $numacmd $DIR/xlinpack_$arch $DIR/lininput_$arch
+  echo -n "Done: "
+  date
+} | tee $DIR/lin_$arch.txt
+
