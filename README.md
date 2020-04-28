@@ -121,7 +121,7 @@ mem | 8192 (8192 = 8GB) | The `server.py` instance can use a total of 8GB of loc
 --until | 30 | Each of the 30 workloads will have a random arrival time between 0 and 30 seconds
 --optimal | Set | The `server.py` and `scheduler.py` will use the optimal shrinking policy. Setting this precludes using both `--uniform_ratio` and `--variable_ratios`
 
-    ./scheduler.py 123 192.168.0.1:50051 8 8192 -r --size 100 --workload quicksort,kmeans,linpack --ratios 3:1:1 --until 30 --variable_ratios 0.5,0.6,0.7 --until 30
+    ./scheduler.py 123 192.168.0.1:50051 8 8192 -r --size 100 --workload quicksort,kmeans,linpack --ratios 3:1:1 --until 30 --variable_ratios 0.5,0.6,0.7
 
 Parameter            | Value | Explanation
 --------------|-----------------|------
@@ -137,7 +137,7 @@ mem | 8192 (8192 = 8GB) | The `server.py` instance can use a total of 8GB of loc
 --until | 30 | Each of the 30 workloads will have a random arrival time between 0 and 30 seconds
 --variable_ratios | 0.5,0.6,0.7 | The three workloads (quicksort, kmeans, and linpack) will have their minimum ratios set to 0.5, 0.6, and 0.7 respectively. `server.py` and `scheduler.py` will use the variable shrinking policy. Setting this precludes using both `--uniform_ratio` and `--optimal`
 
-    ./scheduler.py 123 192.168.0.1:50051,192.168.0.2:50051 8 8192 -r --size 250 --workload quicksort,kmeans,linpack --ratios 3:1:1 --until 20 --uniform_ratio 0.5 --until 30 --start_burst 2
+    ./scheduler.py 123 192.168.0.1:50051,192.168.0.2:50051 8 8192 -r --size 250 --workload quicksort,kmeans,linpack --ratios 3:1:1 --uniform_ratio 0.5 --until 30 --start_burst 2
 
 Parameter            | Value | Explanation
 --------------|-----------------|------
@@ -150,8 +150,8 @@ mem | 8192 (8192 = 8GB) | Each `server.py` instance can use a total of 8GB of lo
 --size | 250 | A total of 250 workloads will be scheduled. The type/number are determined by `--workload` and `--ratios`
 --workload | quicksort,kmeans,linpack | The previously-specified 250 workloads will consist of quicksort, kmeans, and linpack. The mixture is determined by `--ratios`
 --ratios | 3:1:1 | The first, second, and third workloads in the comma-separated list passed to `--workload` constitute 60% (3/(3+1+1)), 20% (1/(3+1+1)), and 20% (1/(3+1+1)) of the 100 workloads respectively. In this example, there will be 150 quicksorts, 50 kmeans, and 50 linpacks scheduled.
---until | 30 | Each of the 30 workloads will have a random arrival time between 0 and 30 seconds
 --uniform_ratio | 0.5 | The three workloads (quicksort, kmeans, and linpack) will have their minimum ratios set to 0.5. `server.py` and `scheduler.py` will use the uniform shrinking policy. Setting this precludes using both `--optimal` and `--variable_ratios`
+--until | 30 | Each of the 30 workloads will have a random arrival time between 0 and 30 seconds
 --start_burst | 2 | The first 2 workloads in the schedule will have their arrival times modified to be 0. This causes them to arrive immediately. 
 
 # Further Reading
