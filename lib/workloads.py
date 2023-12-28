@@ -158,6 +158,56 @@ class Quicksort(Workload):
         full_command = ' '.join((prefix, 'exec', set_cpu, shell_cmd))
         return full_command
 
+class Xgboost(Workload):
+    wname = "xgboost"
+    ideal_mem = 25500
+    min_ratio = 0.3
+    min_mem = int(min_ratio * ideal_mem)
+    binary_name = "python"
+    cpu_req = 8
+    coeff = [-1617.416, 3789.953, -2993.734, 1225.477]
+    def get_cmdline(self, procs_path, pinned_cpus):
+        prefix = "echo $$ > {} &&".format(procs_path)
+        #arg = '8192'
+        shell_cmd = '/usr/bin/time -v' + ' ' + constants.WORK_DIR + '/xgboost/higgs.py {}'.format(arg)
+        pinned_cpus_string = ','.join(map(str, pinned_cpus))
+        set_cpu = 'taskset -c {}'.format(pinned_cpus_string)
+        full_command = ' '.join((prefix, 'exec', set_cpu, shell_cmd))
+        return full_command
+
+class Snappy(workload):
+    wname = "snappy"
+    ideal_mem = 14366
+    min_ratio = 0.3
+    min_mem = int(min_ratio * ideal_mem)
+    binary_name = "compress"
+    cpu_req = 8
+    coeff = [-1617.416, 3789.953, -2993.734, 1225.477]
+    def get_cmdline(self, procs_path, pinned_cpus):
+        prefix = "echo $$ > {} &&".format(procs_path)
+        arg = '-u 27'
+        shell_cmd = '/usr/bin/time -v' + ' ' + constants.WORK_DIR + '/snappy/compress {}'.format(arg)
+        pinned_cpus_string = ','.join(map(str, pinned_cpus))
+        set_cpu = 'taskset -c {}'.format(pinned_cpus_string)
+        full_command = ' '.join((prefix, 'exec', set_cpu, shell_cmd))
+        return full_command
+
+class Pagerank(Workload):
+    wname = "pagerank"
+    ideal_mem = 38912
+    min_ratio = 0.3
+    min_mem = int(min_ratio * ideal_mem)
+    binary_name = "pr"
+    cpu_req = 8
+    coeff = [-1617.416, 3789.953, -2993.734, 1225.477]
+    def get_cmdline(self, procs_path, pinned_cpus):
+        prefix = "echo $$ > {} &&".format(procs_path)
+        arg = '-u 27'
+        shell_cmd = '/usr/bin/time -v' + ' ' + constants.WORK_DIR + '/pagerank/pr {}'.format(arg)
+        pinned_cpus_string = ','.join(map(str, pinned_cpus))
+        set_cpu = 'taskset -c {}'.format(pinned_cpus_string)
+        full_command = ' '.join((prefix, 'exec', set_cpu, shell_cmd))
+        return full_command
 
 class Linpack(Workload):
     wname = "linpack"
@@ -279,32 +329,42 @@ class Kmeans(Workload):
 
         return full_command
 
-
-class Spark(Workload):
-    wname = "spark"
-    ideal_mem = 4400
-    min_ratio = 0.75
+class Redis(Workload):
+    wname = "redis"
+    ideal_mem = 12288
+    min_ratio = 0.5
     min_mem = int(min_ratio * ideal_mem)
-    binary_name = "java"
-    cpu_req = 3
-    coeff = [4689.05, -10841.59, 7709.92, -1486.13]
+    binary_name = "memcached"
+    port_number = 11211
+    cpu_req = 2
+    coeff = [-11626.894, 32733.914, -31797.375, 11484.578, 113.33]
+
+    def __init__(self, idd, pinned_cpus, mem_ratio=1):
+        super().__init__(idd, pinned_cpus, mem_ratio)
+        self.port_number = Memaslap.port_number
+        self.memaslap_pids = set()
+        Memaslap.port_number += 1
 
     def get_cmdline(self, procs_path, pinned_cpus):
-        target_dir = ''.join((constants.WORK_DIR, '/spark/pagerank'))
-        cd_dir = ' '.join(('cd', target_dir, '&&'))
-        prefix = 'echo $$ > {} &&'.format(procs_path)
+        prefix = 'echo $$ > {} &&'
+        memcached_serv = "/usr/bin/time -v memcached -l localhost -p {} -m {} -t 1".format(self.port_number, 
+                                                        self.ideal_mem)
+        cpu_list = list(pinned_cpus)
+        taskset_serv = 'taskset -c {}'.format(cpu_list[0])
+        memcached_serv = ' '.join((prefix, 'exec', taskset_serv, memcached_serv))
+        memcached_serv = memcached_serv.format(procs_path)
 
-        pinned_cpus_string = ','.join(map(str, pinned_cpus))
-        set_cpu = 'taskset -c {}'.format(pinned_cpus_string)
+        taskset_memaslap = 'taskset -c {}'.format(cpu_list[1])
+        memaslap_fill = taskset_memaslap + ' ' + "memaslap -s localhost:{} -T 1 -F {} --execute_number 30000000"
+        memaslap_fill = memaslap_fill.format(self.port_number, "memaslap/memaslap_fill")
 
-        shell_cmd = ' '.join(('/usr/bin/time -v',
-                              constants.SPARK_HOME + 'bin/spark-submit',
-                              '--driver-memory 10g',
-                              '--class \"pagerank\"',
-                              '--master local[2]',
-                              'target/scala-2.11/pagerank_2.11-1.0.jar'))
-        full_command = ' '.join((cd_dir, prefix, 'exec', set_cpu, shell_cmd))
-        return full_command
+        memaslap_query = taskset_memaslap + ' ' + "memaslap -s localhost:{} -T 1 -F {} --execute_number 100000000"
+        memaslap_query = memaslap_query.format(self.port_number, "memaslap/memaslap_etc")
+        sleep = 'sleep 5'
+        memaslap_cmd = ' && '.join((memaslap_fill, sleep, memaslap_query))
+        return (memcached_serv, memaslap_fill, memaslap_query)
+
+
 
 class Memaslap(Workload):
     wname = "memaslap"
