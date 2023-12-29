@@ -142,8 +142,8 @@ class Workload:
 
 class Quicksort(Workload):
     wname = "quicksort"
-    ideal_mem = 8250
-    min_ratio = 0.65
+    ideal_mem = 16500
+    min_ratio = 0.7
     min_mem = int(min_ratio * ideal_mem)
     binary_name = "quicksort"
     cpu_req = 1
@@ -169,24 +169,24 @@ class Xgboost(Workload):
     def get_cmdline(self, procs_path, pinned_cpus):
         prefix = "echo $$ > {} &&".format(procs_path)
         #arg = '8192'
-        shell_cmd = '/usr/bin/time -v' + ' ' + constants.WORK_DIR + '/xgboost/higgs.py {}'.format(arg)
+        shell_cmd = '/usr/bin/time -v' + ' ' + constants.WORK_DIR + '/xgboost/higgs.py'
         pinned_cpus_string = ','.join(map(str, pinned_cpus))
         set_cpu = 'taskset -c {}'.format(pinned_cpus_string)
         full_command = ' '.join((prefix, 'exec', set_cpu, shell_cmd))
         return full_command
 
-class Snappy(workload):
+class Snappy(Workload):
     wname = "snappy"
     ideal_mem = 14366
     min_ratio = 0.3
     min_mem = int(min_ratio * ideal_mem)
     binary_name = "compress"
-    cpu_req = 8
+    cpu_req = 1
     coeff = [-1617.416, 3789.953, -2993.734, 1225.477]
     def get_cmdline(self, procs_path, pinned_cpus):
         prefix = "echo $$ > {} &&".format(procs_path)
-        arg = '-u 27'
-        shell_cmd = '/usr/bin/time -v' + ' ' + constants.WORK_DIR + '/snappy/compress {}'.format(arg)
+        # arg = '-u 27'
+        shell_cmd = '/usr/bin/time -v' + ' ' + constants.WORK_DIR + '/snappy/compress'
         pinned_cpus_string = ','.join(map(str, pinned_cpus))
         set_cpu = 'taskset -c {}'.format(pinned_cpus_string)
         full_command = ' '.join((prefix, 'exec', set_cpu, shell_cmd))
@@ -209,163 +209,84 @@ class Pagerank(Workload):
         full_command = ' '.join((prefix, 'exec', set_cpu, shell_cmd))
         return full_command
 
-class Linpack(Workload):
-    wname = "linpack"
-    ideal_mem = 1600
-    min_ratio = 0.9
-    min_mem = int(min_ratio * ideal_mem)
-    binary_name = "xlinpack_xeon64"
-    cpu_req = 4
-    coeff = [38.52, -77.88, 26.86, 36.70]
 
-    def get_cmdline(self, procs_path, pinned_cpus):
-        linpack_dir = constants.WORK_DIR + '/linpack'
-        prefix = "echo $$ > {} &&".format(procs_path)
-        set_vars = ' '.join(('MKL_NUM_THREADS=4',
-                             'OMP_NUM_THREADS=4',
-                             'MKL_DOMAIN_NUM_THREADS=4'))
-        
-        pinned_cpus_string = ','.join(map(str, pinned_cpus))
-        set_cpu = 'taskset -c {}'.format(pinned_cpus_string)
-
-        set_vars = ' '.join(('KMP_AFFINITY=nowarnings,compact,1,0,granularity=fine',
-                             set_vars))
-
-        bin_path = '{}/xlinpack_xeon64'.format(linpack_dir)
-        cmdline = '{}/lininput_xeon64'.format(linpack_dir)
-        after_exec = ' '.join(('/usr/bin/time -v', bin_path, cmdline))
-        full_command = ' '.join((prefix, set_vars, 'exec', set_cpu, after_exec))
-        return full_command
-
-
-class Tfinception(Workload):
-    wname = "tf-inception"
-    ideal_mem = 2120
-    min_ratio = 0.9
-    min_mem = int(min_ratio * ideal_mem)
-    binary_name = "python3"
-    cpu_req = 2
-    coeff = [-1617.416, 3789.953, -2993.734, 1225.477]
-
-    def get_cmdline(self, procs_path, pinned_cpus):
-        work_dir = ''.join((constants.WORK_DIR,
-                            '/tensorflow/benchmarks/scripts/tf_cnn_benchmarks'))
-        
-        pinned_cpus_string = ','.join(map(str, pinned_cpus))
-        set_cpu = 'taskset -c {}'.format(pinned_cpus_string)
-
-        cd_dir = ' '.join(('cd', work_dir, '&&'))
-        prefix = "echo $$ > {} &&".format(procs_path)
-        set_vars = ' '.join(('KMP_BLOCK_TIME=0',
-                             'KMP_SETTINGS=1 OMP_NUM_THREADS=2'))
-        
-        set_vars = ' '.join(('KMP_AFFINITY=granularity=fine,verbose,compact,1,0',
-                             set_vars))
-
-        shell_cmd = ' '.join(("/usr/bin/time -v python3 tf_cnn_benchmarks.py",
-                              "--forward_only=True --data_format=NHWC --device=cpu",
-                              "--batch_size=64 --num_inter_threads=1",
-                              "--num_intra_threads=2 --nodistortions",
-                              "--model=inception3",
-                              "--kmp_blocktime=0 --num_batches=20",
-                              "--num_warmup_batches 0"))
-        full_command = ' '.join((cd_dir, prefix, set_vars, 'exec', set_cpu, shell_cmd))
-        return full_command
-
-
-class Tfresnet(Workload):
-    wname = "tf-resnet"
-    ideal_mem = 1268
-    min_ratio = 0.9
-    min_mem = int(min_ratio * ideal_mem)
-    binary_name = "python3"
-    cpu_req = 2
-    coeff = [-1617.416, 3789.953, -2993.734, 1225.477]
-
-    def get_cmdline(self, procs_path, pinned_cpus):
-        work_dir = ''.join((constants.WORK_DIR,
-                            '/tensorflow/benchmarks/scripts/tf_cnn_benchmarks'))
-
-        pinned_cpus_string = ','.join(map(str, pinned_cpus))
-        set_cpu = 'taskset -c {}'.format(pinned_cpus_string)
-        
-        cd_dir = ' '.join(('cd', work_dir, '&&'))
-        prefix = "echo $$ > {} &&".format(procs_path)
-        set_vars = ' '.join(('KMP_BLOCK_TIME=0',
-                             'KMP_SETTINGS=1 OMP_NUM_THREADS=2'))
-        
-        set_vars = ' '.join(('KMP_AFFINITY=granularity=fine,verbose,compact,1,0',
-                             set_vars))
-
-        shell_cmd = ' '.join(("/usr/bin/time -v python3 tf_cnn_benchmarks.py",
-                              "--forward_only=True --data_format=NHWC --device=cpu",
-                              "--batch_size=64 --num_inter_threads=1",
-                              "--num_intra_threads=2 --nodistortions",
-                              "--model=resnet50",
-                              "--kmp_blocktime=0 --num_batches=20",
-                              "--num_warmup_batches 0"))
-        full_command = ' '.join((cd_dir, prefix, set_vars, 'exec', set_cpu, shell_cmd))
-        return full_command
-
-
-class Kmeans(Workload):
-    wname = "kmeans"
-    ideal_mem = 4847
-    binary_name = "python3"
-    min_ratio = 0.75
-    min_mem = int(min_ratio * ideal_mem)
-    cpu_req = 1
-    coeff = [-10341.875,  31554.403, -34346.894,  15214.428,  -1730.533]
-
-    def get_cmdline(self, procs_path, pinned_cpus):
-        prefix = "echo $$ > {} && OMP_NUM_THREADS={}".format(procs_path, self.cpu_req)
-        bin_path = constants.WORK_DIR + '/kmeans/kmeans.py'
-        shell_cmd = '/usr/bin/time -v python3' + ' ' + bin_path
-        
-        pinned_cpus_string = ','.join(map(str, pinned_cpus))
-        set_cpu = 'taskset -c {}'.format(pinned_cpus_string)
-        
-        full_command = ' '.join((prefix, 'exec', set_cpu, shell_cmd))
-
-        return full_command
 
 class Redis(Workload):
     wname = "redis"
     ideal_mem = 12288
     min_ratio = 0.5
     min_mem = int(min_ratio * ideal_mem)
-    binary_name = "memcached"
-    port_number = 11211
+    binary_name = "redis-server"
+    port_number = 6379
     cpu_req = 2
     coeff = [-11626.894, 32733.914, -31797.375, 11484.578, 113.33]
 
     def __init__(self, idd, pinned_cpus, mem_ratio=1):
         super().__init__(idd, pinned_cpus, mem_ratio)
-        self.port_number = Memaslap.port_number
-        self.memaslap_pids = set()
-        Memaslap.port_number += 1
+        self.port_number = Redis.port_number
+        self.redis_bench_pids = set()
+        Redis.port_number += 1
 
     def get_cmdline(self, procs_path, pinned_cpus):
         prefix = 'echo $$ > {} &&'
-        memcached_serv = "/usr/bin/time -v memcached -l localhost -p {} -m {} -t 1".format(self.port_number, 
+        redis_serv = "/usr/bin/time -v redis-server --port {} --maxmemory {}mb --maxmemory-policy allkeys-lru".format(self.port_number, 
                                                         self.ideal_mem)
         cpu_list = list(pinned_cpus)
         taskset_serv = 'taskset -c {}'.format(cpu_list[0])
-        memcached_serv = ' '.join((prefix, 'exec', taskset_serv, memcached_serv))
-        memcached_serv = memcached_serv.format(procs_path)
+        redis_serv = ' '.join((prefix, 'exec', taskset_serv, redis_serv))
+        redis_serv = redis_serv.format(procs_path)
 
-        taskset_memaslap = 'taskset -c {}'.format(cpu_list[1])
-        memaslap_fill = taskset_memaslap + ' ' + "memaslap -s localhost:{} -T 1 -F {} --execute_number 30000000"
-        memaslap_fill = memaslap_fill.format(self.port_number, "memaslap/memaslap_fill")
-
-        memaslap_query = taskset_memaslap + ' ' + "memaslap -s localhost:{} -T 1 -F {} --execute_number 100000000"
-        memaslap_query = memaslap_query.format(self.port_number, "memaslap/memaslap_etc")
+        taskset_redis_bench = 'taskset -c {}'.format(cpu_list[1])
+        redis_bench_fill = taskset_redis_bench + ' ' + "redis-benchmark -p {} -n 30000000 -r 100000000 -t set,get -q".format(self.port_number)
         sleep = 'sleep 5'
-        memaslap_cmd = ' && '.join((memaslap_fill, sleep, memaslap_query))
-        return (memcached_serv, memaslap_fill, memaslap_query)
+        redis_bench_cmd = ' && '.join((redis_bench_fill, sleep))
+        return (redis_serv, redis_bench_fill)
+
+    def start(self):
+        self.thread = threading.Thread(target=self.__exec)
+        self.thread.start()
+
+        while not self.is_alive():
+            pass
+
+    def __exec(self):
+        redis, redis_bench_fill = self.cmdline
+
+        " execute in self.thread "
+        print(self.cmdline)
+
+        self.ts_start = time.time()
+
+        self.popen = subprocess.Popen(redis, stdout=subprocess.PIPE,
+                                      stderr=subprocess.PIPE, shell=True,
+                                      preexec_fn=os.setsid)
+
+        time.sleep(3) # Wait for redis to boot
+        redis_bench_proc = subprocess.Popen(shlex.split(redis_bench_fill), stdout=subprocess.PIPE,
+                                        stderr=subprocess.PIPE, shell=False)
+        self.redis_bench_pids.add(redis_bench_proc.pid)
+        stdout, stderr = redis_bench_proc.communicate()
+        self.redis_bench_pids.remove(redis_bench_proc.pid)
+
+        print(stdout.decode('utf-8'))
+        print(stderr.decode('utf-8'))
+
+        os.killpg(os.getpgid(self.popen.pid), signal.SIGINT)
+
+        self.stdout, self.stderr = self.popen.communicate()
+        self.ts_finish = time.time()
+        print(self.stdout.decode('utf-8'))
+        print(self.stderr.decode('utf-8'))
+
+        self.container.delete()
+
+    def get_pids(self):
+        pids = list(self.container.get_pids())
+        pids.extend(self.redis_bench_pids)
+        return pids
 
 
-
+# TODO: delete this work load... 
 class Memaslap(Workload):
     wname = "memaslap"
     ideal_mem = 12288
@@ -451,33 +372,29 @@ class Memaslap(Workload):
         pids.extend(self.memaslap_pids)
         return pids
 
-class Stream(Workload):
-    wname = "stream"
-    ideal_mem = 4150
-    min_ratio = 0.50
+class Xsbench(Workload):
+    wname = "xsbench"
+    ideal_mem = 36864
+    min_ratio = 0.85
     min_mem = int(min_ratio * ideal_mem)
-    binary_name = "stream_c.exe"
-    cpu_req = 1
-    coeff = [0]
+    binary_name = "XSBench"
+    cpu_req = 8
+    coeff = [-1984.129, 4548.033, -3588.554, 1048.644, 252.997]
 
     def get_cmdline(self, procs_path, pinned_cpus):
-        target_dir = ''.join((constants.WORK_DIR, '/stream'))
-        cd_dir = ' '.join(('cd', target_dir, '&&'))
-        prefix = 'echo $$ > {} && OMP_NUM_THREADS={}'.format(procs_path, len(pinned_cpus))
-
+        prefix = "echo $$ > {} &&".format(procs_path)
+        arg = '-g 20 -p 100000'
+        shell_cmd = '/usr/bin/time -v' + ' ' + constants.WORK_DIR + '/xsbench/XSBench {}'.format(arg)
         pinned_cpus_string = ','.join(map(str, pinned_cpus))
         set_cpu = 'taskset -c {}'.format(pinned_cpus_string)
-
-        shell_cmd = 'nice -n -2 /usr/bin/time -v ./stream_c.exe'.format(len(pinned_cpus))
-        full_command = ' '.join((cd_dir, prefix, 'exec', set_cpu, shell_cmd))
+        full_command = ' '.join((prefix, 'exec', set_cpu, shell_cmd))
         return full_command
 
 def get_workload_class(wname):
     return {'quicksort': Quicksort,
-            'linpack': Linpack,
-            'tf-inception': Tfinception,
-            'tf-resnet': Tfresnet,
-            'spark': Spark,
-            'kmeans': Kmeans,
-            'memaslap': Memaslap,
-            'stream': Stream}[wname]
+            'xgboost': Xgboost,
+            'redis': Redis,
+            'snappy': Snappy,
+            'pagerank': Pagerank,
+            'xsbench': Xsbench
+            }[wname]
