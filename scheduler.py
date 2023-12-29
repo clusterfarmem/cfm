@@ -499,8 +499,8 @@ def main():
                         'default=200', default=200)
     parser.add_argument('--workload', type=lambda s: s.split(','),
                         help='tasks that comprise the workload ' \
-                        'default=quicksort,kmeans,memaslap',
-                        default='quicksort,kmeans,memaslap')
+                        'default=pagerank,xgboost,redis',
+                        default='pagerank,xgboost,redis')
     parser.add_argument('--ratios', type=lambda s: s.split(':'),
                         help='ratios of tasks in workload, default=2:1:1',
                         default="2:1:1")

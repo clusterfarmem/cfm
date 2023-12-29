@@ -106,7 +106,7 @@ class Machine:
         # State for calculating percents
         self.last_time = 0
         self.slow_downs = {}
-        for wname in ['quicksort', 'kmeans', 'memaslap', 'linpack', 'spark', 'tf-inception']:
+        for wname in ['quicksort', 'snappy', 'redis', 'xgboost', 'pagerank', 'xsbench']:
             self.slow_downs[wname] = 1
 
     def checkin(self, max_cpus, max_mem, use_remote, uniform_ratio, variable_ratios, limit_remote_mem, optimal):
@@ -449,7 +449,7 @@ class Machine:
         pids = list()
         for workload in self.executing:
             '''Only get pids for things in the container
-               This prevents the memaslap from being included with memcached'''
+               This prevents the redis from being included with memcached'''
             pids.extend(workload.container.get_pids())
 
         total_swap = 0
