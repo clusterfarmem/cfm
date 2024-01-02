@@ -23,6 +23,8 @@ import re
 import numpy as np
 from scipy.optimize import Bounds, minimize
 
+import subprocess
+
 MAIN_LOOP_SLEEP = 1
 DRIVER_PATH = "/sys/class/infiniband/mlx4_0/ports/1/counters/{}"
 MEGABYTE = 1024*1024
@@ -290,15 +292,14 @@ class Machine:
     def check_thp(self):
         with open(THP_PATH, 'r') as f:
             if '[never]' not in f.read():
-                with open(THP_PATH, 'w') as f:
-                    f.write('[never]')
+                subprocess.run('sudo sh -c "echo never > {}"'.format(THP_PATH), shell=True)
                 print('Transparent Hugepage is not disabled, it has been set to [never]')
+
 
     def check_somaxconn(self):
         with open(SOMAXCONN_PATH, 'r') as f:
             if '65536' != f.read().strip('\n'):
-                with open(SOMAXCONN_PATH, 'w') as f:
-                    f.write('65536')
+                subprocess.run('sudo sh -c "echo 65536 > {}"'.format(SOMAXCONN_PATH), shell=True)
                 print('somaxconn is set to an incorrect value, it has been set to 65536')
     
     def check_tf_mkl(self):
