@@ -164,7 +164,7 @@ class Machine:
         #self.check_swappiness()
         self.check_thp()
         self.check_somaxconn()
-        self.check_tf_mkl()
+        # self.check_tf_mkl()
 
         logging.info("Checkin Successful")
 
