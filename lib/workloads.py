@@ -151,7 +151,7 @@ class Quicksort(Workload):
 
     def get_cmdline(self, procs_path, pinned_cpus):
         prefix = "echo $$ > {} &&".format(procs_path)
-        arg = '8192'
+        arg = '16384'
         shell_cmd = '/usr/bin/time -v' + ' ' + constants.WORK_DIR + '/quicksort/quicksort {}'.format(arg)
         pinned_cpus_string = ','.join(map(str, pinned_cpus))
         set_cpu = 'taskset -c {}'.format(pinned_cpus_string)
