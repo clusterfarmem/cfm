@@ -1,4 +1,9 @@
-[submodule "tensorflow/benchmarks"]
-	path = tensorflow/benchmarks
-	url = https://github.com/tensorflow/benchmarks.git
-	branch = cnn_tf_v1.14_compatible
+[submodule "pagerank/gapbs"]
+	path = pagerank/gapbs
+	url = https://github.com/sbeamer/gapbs.git
+[submodule "xsbench/XSBench"]
+	path = xsbench/XSBench
+	url = https://github.com/ANL-CESAR/XSBench.git
+[submodule "snappy/snappy"]
+	path = snappy/snappy
+	url = https://github.com/google/snappy.git

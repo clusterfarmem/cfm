@@ -289,11 +289,17 @@ class Machine:
     
     def check_thp(self):
         with open(THP_PATH, 'r') as f:
-            assert('[never]' in f.read()), 'Transparent Hugepage is not disabled' 
+            if '[never]' not in f.read():
+                with open(THP_PATH, 'w') as f:
+                    f.write('[never]')
+                print('Transparent Hugepage is not disabled, it has been set to [never]')
 
     def check_somaxconn(self):
         with open(SOMAXCONN_PATH, 'r') as f:
-            assert('65536' == f.read().strip('\n')), 'somaxconn is set to an incorrect value'
+            if '65536' != f.read().strip('\n'):
+                with open(SOMAXCONN_PATH, 'w') as f:
+                    f.write('65536')
+                print('somaxconn is set to an incorrect value, it has been set to 65536')
     
     def check_tf_mkl(self):
         assert(test_util.IsMklEnabled()), "tensorflow doesn't have mkl enabled"
