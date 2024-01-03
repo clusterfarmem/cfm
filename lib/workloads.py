@@ -160,16 +160,16 @@ class Quicksort(Workload):
 
 class Xgboost(Workload):
     wname = "xgboost"
-    ideal_mem = 25500
+    ideal_mem = 8500
     min_ratio = 0.3
     min_mem = int(min_ratio * ideal_mem)
     binary_name = "python"
-    cpu_req = 8
+    cpu_req = 4
     coeff = [-1617.416, 3789.953, -2993.734, 1225.477]
     def get_cmdline(self, procs_path, pinned_cpus):
         prefix = "echo $$ > {} &&".format(procs_path)
         #arg = '8192'
-        shell_cmd = '/usr/bin/time -v' + ' ' + constants.WORK_DIR + '/xgboost/higgs.py'
+        shell_cmd = '/usr/bin/time -v' + ' ' + 'python ' + constants.WORK_DIR + '/xgboost/higgs.py'
         pinned_cpus_string = ','.join(map(str, pinned_cpus))
         set_cpu = 'taskset -c {}'.format(pinned_cpus_string)
         full_command = ' '.join((prefix, 'exec', set_cpu, shell_cmd))
@@ -202,7 +202,7 @@ class Pagerank(Workload):
     coeff = [-1617.416, 3789.953, -2993.734, 1225.477]
     def get_cmdline(self, procs_path, pinned_cpus):
         prefix = "echo $$ > {} &&".format(procs_path)
-        arg = '-u 27'
+        arg = '-f /mydata/gapbs/mydata/gapbs/k27output.sg'
         shell_cmd = '/usr/bin/time -v' + ' ' + constants.WORK_DIR + '/pagerank/pr {}'.format(arg)
         pinned_cpus_string = ','.join(map(str, pinned_cpus))
         set_cpu = 'taskset -c {}'.format(pinned_cpus_string)

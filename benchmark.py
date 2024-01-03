@@ -38,9 +38,8 @@ def run_benchmark(args):
 
 def main():
     # Parse Command Line Arguments
-    workload_choices = ['quicksort', 'linpack', 'tf-inception',
-                        'tf-resnet', 'spark', 'kmeans', 'memaslap',
-                        'stream']
+    workload_choices = ['quicksort', 'xgboost', 'xsbench',
+                        'redis', 'pagerank']
 
     parser = argparse.ArgumentParser(description='Run a workload in a '
                                      'parameterized container')
