@@ -1,7 +1,7 @@
 all: compress
 
 compress: compress.cpp
-    g++ -o compress compress.cpp -lsnappy -lcrypto
+    g++ compress.cpp -lsnappy -lcrypto -o compress
 
 clean:
     rm -f compress

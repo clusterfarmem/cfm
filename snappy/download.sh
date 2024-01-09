@@ -18,18 +18,5 @@ for i in $(seq 1 12); do
   # bzip2 -d "${file}"
 done
 
-bzip2 *.bz2
+bunzip2 *.bz2
 
-echo '<?xml version="1.0" encoding="UTF-8"?>' > merged.xml
-echo '<root>' >> merged.xml
-
-
-for file in enwiki-*
-do
-    if [ -f "$file" ]
-    then
-        sed '1d;$d' $file >> merged.xml
-    fi
-done
-
-echo '</root>' >> merged.xml

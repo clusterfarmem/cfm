@@ -142,16 +142,18 @@ class Workload:
 
 class Quicksort(Workload):
     wname = "quicksort"
-    ideal_mem = 16500
+    ideal_mem = 10400
     min_ratio = 0.7
     min_mem = int(min_ratio * ideal_mem)
     binary_name = "quicksort"
     cpu_req = 1
-    coeff = [-1984.129, 4548.033, -3588.554, 1048.644, 252.997]
+    x = [1,      0.9,    0.8,   0.7,    0.6]
+    y = [248.75, 260.41, 268.4, 280.11, 300.78]
+    coeff = [-895.83333333, 1814.16666667, -719.04166667, -586.04166667,  635.5]
 
     def get_cmdline(self, procs_path, pinned_cpus):
         prefix = "echo $$ > {} &&".format(procs_path)
-        arg = '16384'
+        arg = '10240'
         shell_cmd = '/usr/bin/time -v' + ' ' + constants.WORK_DIR + '/quicksort/quicksort {}'.format(arg)
         pinned_cpus_string = ','.join(map(str, pinned_cpus))
         set_cpu = 'taskset -c {}'.format(pinned_cpus_string)
@@ -160,12 +162,14 @@ class Quicksort(Workload):
 
 class Xgboost(Workload):
     wname = "xgboost"
-    ideal_mem = 8500
+    ideal_mem = 11150
     min_ratio = 0.3
     min_mem = int(min_ratio * ideal_mem)
     binary_name = "python"
     cpu_req = 4
-    coeff = [-1617.416, 3789.953, -2993.734, 1225.477]
+    x = [1,      0.9,    0.8,    0.7,    0.6,    0.5,    0.4,    0.3,    0.2]
+    y = [332.45, 336.90, 341.52, 345.21, 358.92, 362.85, 382.37, 408.67, 413.20]
+    coeff = [-1012.7039627,   2482.42553743, -1996.51689977,   477.3734719, 381.04722222]
     def get_cmdline(self, procs_path, pinned_cpus):
         prefix = "echo $$ > {} &&".format(procs_path)
         #arg = '8192'
@@ -177,16 +181,19 @@ class Xgboost(Workload):
 
 class Snappy(Workload):
     wname = "snappy"
-    ideal_mem = 14366
-    min_ratio = 0.3
+    ideal_mem = 34000
+    min_ratio = 0.7
     min_mem = int(min_ratio * ideal_mem)
     binary_name = "compress"
     cpu_req = 1
-    coeff = [-1617.416, 3789.953, -2993.734, 1225.477]
+    x = [1,      0.9,    0.8,    0.7,    0.6]
+    y = [134.88, 143.15, 155.37, 211.18, 274.42]
+    coeff = [-31583.33333335,  100776.66666673, -118088.66666675,   59796.08333338, -10765.87000001]
     def get_cmdline(self, procs_path, pinned_cpus):
         prefix = "echo $$ > {} &&".format(procs_path)
-        # arg = '-u 27'
-        shell_cmd = '/usr/bin/time -v' + ' ' + constants.WORK_DIR + '/snappy/compress'
+        arg = constants.WORK_DIR + '/snappy/merged.xml'
+        shell_cmd = '/usr/bin/time -v' + ' ' + 'python' + ' ' + constants.WORK_DIR + '/snappy/compress.py {}'.format(arg) 
+        #shell_cmd = '/usr/bin/time -v' + ' ' + constants.WORK_DIR + '/snappy/compress {}'.format(arg) 
         pinned_cpus_string = ','.join(map(str, pinned_cpus))
         set_cpu = 'taskset -c {}'.format(pinned_cpus_string)
         full_command = ' '.join((prefix, 'exec', set_cpu, shell_cmd))
@@ -194,16 +201,21 @@ class Snappy(Workload):
 
 class Pagerank(Workload):
     wname = "pagerank"
-    ideal_mem = 18912
-    min_ratio = 0.3
+    ideal_mem = 18900
+    min_ratio = 1
     min_mem = int(min_ratio * ideal_mem)
     binary_name = "pr"
     cpu_req = 8
+    x = [1,      0.9,    0.8]
+    y = [221.06, 736.29, 99900000.00]
     coeff = [-1617.416, 3789.953, -2993.734, 1225.477]
     def get_cmdline(self, procs_path, pinned_cpus):
         prefix = "echo $$ > {} &&".format(procs_path)
-        arg = '-f /mydata/gapbs/u27output.sg'
-        shell_cmd = '/usr/bin/time -v' + ' ' + constants.WORK_DIR + '/pagerank/pr {}'.format(arg)
+        #limit_mem = "echo $$ > {} ".format(procs_path)
+        arg = '-f' + ' ' + constants.WORK_DIR + '/pagerank/gapbs/k27output.sg'
+        #arg = '-u 27'
+        pr_cmd = constants.WORK_DIR + '/pagerank/gapbs/pr {}'.format(arg)
+        shell_cmd = '/usr/bin/time -v' + ' ' + pr_cmd
         pinned_cpus_string = ','.join(map(str, pinned_cpus))
         set_cpu = 'taskset -c {}'.format(pinned_cpus_string)
         full_command = ' '.join((prefix, 'exec', set_cpu, shell_cmd))
@@ -213,14 +225,15 @@ class Pagerank(Workload):
 
 class Redis(Workload):
     wname = "redis"
-    ideal_mem = 12288
+    ideal_mem = 31800
     min_ratio = 0.5
     min_mem = int(min_ratio * ideal_mem)
     binary_name = "redis-server"
-    port_number = 6379
+    port_number = 63791
     cpu_req = 2
-    coeff = [-11626.894, 32733.914, -31797.375, 11484.578, 113.33]
-
+    x = [1,      0.9,    0.8,    0.7,    0.6,    0.5,    0.4]
+    y = [808.74, 810.76, 815.47, 817.41, 819.92, 820.10, 840.10 ]
+    coeff = [2664.77272727, -7949.41919192,  8685.70833333, -4138.11046176, 1545.93190476]
     def __init__(self, idd, pinned_cpus, mem_ratio=1):
         super().__init__(idd, pinned_cpus, mem_ratio)
         self.port_number = Redis.port_number
@@ -230,17 +243,24 @@ class Redis(Workload):
     def get_cmdline(self, procs_path, pinned_cpus):
         prefix = 'echo $$ > {} &&'
         redis_serv = "/usr/bin/time -v redis-server --port {} --maxmemory {}mb --maxmemory-policy allkeys-lru".format(self.port_number, 
-                                                        self.ideal_mem)
+                                                    self.ideal_mem)
         cpu_list = list(pinned_cpus)
+        #pinned_cpus_string1 = ','.join(map(str, pinned_cpus[0:3]))
+        #pinned_cpus_string2 = ','.join(map(str, pinned_cpus[4:7]))
+
         taskset_serv = 'taskset -c {}'.format(cpu_list[0])
         redis_serv = ' '.join((prefix, 'exec', taskset_serv, redis_serv))
         redis_serv = redis_serv.format(procs_path)
 
-        taskset_redis_bench = 'taskset -c {}'.format(cpu_list[1])
-        redis_bench_fill = taskset_redis_bench + ' ' + "redis-benchmark -p {} -n 30000000 -r 100000000 -t set,get -q".format(self.port_number)
+        taskset_ycsb = 'taskset -c {}'.format(cpu_list[1])
+        # YCSB load data
+        ycsb_load = taskset_ycsb + ' ' + constants.WORK_DIR + "/redis/ycsb-0.17.0/bin/ycsb.sh load redis -s -P " + constants.WORK_DIR + "/redis/ycsb-0.17.0/workloads/workloadb -p \"redis.host=localhost\" -p \"redis.port={}\" -p \"operationcount=30000000\" -p \"recordcount=30000000\" -p \"fieldlength=256\" -p \"fieldcount=2\"".format(self.port_number)
+        # YCSB run workload with Zipf distribution
+        ycsb_run = taskset_ycsb + ' ' + constants.WORK_DIR + "/redis/ycsb-0.17.0/bin/ycsb.sh run redis -s -P " + constants.WORK_DIR + "/redis/ycsb-0.17.0/workloads/workloadb -p \"redis.host=localhost\" -p \"redis.port={}\" -p \"operationcount=30000000\" -p \"requestdistribution=zipfian\"".format(self.port_number)
+    
         sleep = 'sleep 5'
-        redis_bench_cmd = ' && '.join((redis_bench_fill, sleep))
-        return (redis_serv, redis_bench_fill)
+        ycsb_cmd = ' && '.join((ycsb_load, sleep, ycsb_run))
+        return (redis_serv, ycsb_cmd)
 
     def start(self):
         self.thread = threading.Thread(target=self.__exec)
@@ -250,7 +270,7 @@ class Redis(Workload):
             pass
 
     def __exec(self):
-        redis, redis_bench_fill = self.cmdline
+        redis, ycsb_cmd = self.cmdline
 
         " execute in self.thread "
         print(self.cmdline)
@@ -258,16 +278,25 @@ class Redis(Workload):
         self.ts_start = time.time()
 
         self.popen = subprocess.Popen(redis, stdout=subprocess.PIPE,
-                                      stderr=subprocess.PIPE, shell=True,
-                                      preexec_fn=os.setsid)
+                                  stderr=subprocess.PIPE, shell=True,
+                                  preexec_fn=os.setsid)
 
         time.sleep(3) # Wait for redis to boot
-        redis_bench_proc = subprocess.Popen(shlex.split(redis_bench_fill), stdout=subprocess.PIPE,
-                                        stderr=subprocess.PIPE, shell=False)
-        self.redis_bench_pids.add(redis_bench_proc.pid)
-        stdout, stderr = redis_bench_proc.communicate()
-        self.redis_bench_pids.remove(redis_bench_proc.pid)
 
+        # Split ycsb_cmd into ycsb_load, sleep, ycsb_run
+        ycsb_load, _, ycsb_run = ycsb_cmd.split(' && ')
+
+        # Load data
+        ycsb_load_proc = subprocess.Popen(shlex.split(ycsb_load), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False)
+        stdout, stderr = ycsb_load_proc.communicate()
+        print(stdout.decode('utf-8'))
+        print(stderr.decode('utf-8'))
+
+        time.sleep(5) # Wait for data to load
+
+        # Run workload
+        ycsb_run_proc = subprocess.Popen(shlex.split(ycsb_run), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False)
+        stdout, stderr = ycsb_run_proc.communicate()
         print(stdout.decode('utf-8'))
         print(stderr.decode('utf-8'))
 
@@ -276,7 +305,7 @@ class Redis(Workload):
         self.stdout, self.stderr = self.popen.communicate()
         self.ts_finish = time.time()
         print(self.stdout.decode('utf-8'))
-        print(self.stderr.decode('utf-8'))
+        print(stderr.decode('utf-8'))
 
         self.container.delete()
 
@@ -286,41 +315,26 @@ class Redis(Workload):
         return pids
 
 
-# TODO: delete this work load... 
-class Memaslap(Workload):
-    wname = "memaslap"
-    ideal_mem = 12288
-    min_ratio = 0.5
-    min_mem = int(min_ratio * ideal_mem)
-    binary_name = "memcached"
-    port_number = 11211
-    cpu_req = 2
-    coeff = [-11626.894, 32733.914, -31797.375, 11484.578, 113.33]
 
-    def __init__(self, idd, pinned_cpus, mem_ratio=1):
-        super().__init__(idd, pinned_cpus, mem_ratio)
-        self.port_number = Memaslap.port_number
-        self.memaslap_pids = set()
-        Memaslap.port_number += 1
+class Xsbench(Workload):
+    wname = "xsbench"
+    ideal_mem = 33300
+    min_ratio = 1
+    min_mem = int(min_ratio * ideal_mem)
+    binary_name = "XSBench"
+    cpu_req = 8
+    x = [1, 0.9, 0.8]
+    y = [244.91, 478.54, 10000.0]
+    coeff = [-1984.129, 4548.033, -3588.554, 1048.644, 252.997]
 
     def get_cmdline(self, procs_path, pinned_cpus):
-        prefix = 'echo $$ > {} &&'
-        memcached_serv = "/usr/bin/time -v memcached -l localhost -p {} -m {} -t 1".format(self.port_number, 
-                                                        self.ideal_mem)
-        cpu_list = list(pinned_cpus)
-        taskset_serv = 'taskset -c {}'.format(cpu_list[0])
-        memcached_serv = ' '.join((prefix, 'exec', taskset_serv, memcached_serv))
-        memcached_serv = memcached_serv.format(procs_path)
-
-        taskset_memaslap = 'taskset -c {}'.format(cpu_list[1])
-        memaslap_fill = taskset_memaslap + ' ' + "memaslap -s localhost:{} -T 1 -F {} --execute_number 30000000"
-        memaslap_fill = memaslap_fill.format(self.port_number, "memaslap/memaslap_fill")
-
-        memaslap_query = taskset_memaslap + ' ' + "memaslap -s localhost:{} -T 1 -F {} --execute_number 100000000"
-        memaslap_query = memaslap_query.format(self.port_number, "memaslap/memaslap_etc")
-        sleep = 'sleep 5'
-        memaslap_cmd = ' && '.join((memaslap_fill, sleep, memaslap_query))
-        return (memcached_serv, memaslap_fill, memaslap_query)
+        prefix = "echo $$ > {} &&".format(procs_path)
+        arg = '-g 65000 -p 20000000'
+        shell_cmd = '/usr/bin/time -v' + ' ' + constants.WORK_DIR + '/xsbench/XSBench/openmp-threading/XSBench {}'.format(arg)
+        pinned_cpus_string = ','.join(map(str, pinned_cpus))
+        set_cpu = 'taskset -c {}'.format(pinned_cpus_string)
+        full_command = ' '.join((prefix, 'exec', set_cpu, shell_cmd))
+        return full_command
 
     def start(self):
         self.thread = threading.Thread(target=self.__exec)
@@ -330,65 +344,17 @@ class Memaslap(Workload):
             pass
 
     def __exec(self):
-        memcached, memaslap_fill, memaslap_query = self.cmdline
-
-        " execute in self.thread "
-        print(self.cmdline)
-
+        env = os.environ.copy()
+        env['OMP_NUM_THREADS'] = '8'
         self.ts_start = time.time()
-
-        self.popen = subprocess.Popen(memcached, stdout=subprocess.PIPE,
-                                      stderr=subprocess.PIPE, shell=True,
-                                      preexec_fn=os.setsid)
-
-        time.sleep(3) # Wait for memcached to boot
-        memaslap_proc = subprocess.Popen(shlex.split(memaslap_fill), stdout=subprocess.PIPE,
-                                        stderr=subprocess.PIPE, shell=False)
-        self.memaslap_pids.add(memaslap_proc.pid)
-        stdout, stderr = memaslap_proc.communicate()
-        self.memaslap_pids.remove(memaslap_proc.pid)
-
-        time.sleep(5)
-        memaslap_proc = subprocess.Popen(shlex.split(memaslap_query), stdout=subprocess.PIPE,
-                                        stderr=subprocess.PIPE, shell=False)
-        self.memaslap_pids.add(memaslap_proc.pid)
-        stdout, stderr = memaslap_proc.communicate()
-        self.memaslap_pids.remove(memaslap_proc.pid)
-        
-        print(stdout.decode('utf-8'))
-        print(stderr.decode('utf-8'))
-
-        os.killpg(os.getpgid(self.popen.pid), signal.SIGINT)
-
-        self.stdout, self.stderr = self.popen.communicate()
+        self.popen = subprocess.Popen(self.cmdline, stdout=subprocess.PIPE,
+                                      stderr=subprocess.PIPE, shell=True, env=env)
+        self.stdout, self.stderr = self.popen.communicate()  # blocks process exit
+        assert(self.popen.returncode == 0)
         self.ts_finish = time.time()
-        print(self.stdout.decode('utf-8'))
-        print(self.stderr.decode('utf-8'))
 
         self.container.delete()
 
-    def get_pids(self):
-        pids = list(self.container.get_pids())
-        pids.extend(self.memaslap_pids)
-        return pids
-
-class Xsbench(Workload):
-    wname = "xsbench"
-    ideal_mem = 36864
-    min_ratio = 0.85
-    min_mem = int(min_ratio * ideal_mem)
-    binary_name = "XSBench"
-    cpu_req = 8
-    coeff = [-1984.129, 4548.033, -3588.554, 1048.644, 252.997]
-
-    def get_cmdline(self, procs_path, pinned_cpus):
-        prefix = "echo $$ > {} &&".format(procs_path)
-        arg = '-g 20 -p 100000'
-        shell_cmd = '/usr/bin/time -v' + ' ' + constants.WORK_DIR + '/xsbench/XSBench {}'.format(arg)
-        pinned_cpus_string = ','.join(map(str, pinned_cpus))
-        set_cpu = 'taskset -c {}'.format(pinned_cpus_string)
-        full_command = ' '.join((prefix, 'exec', set_cpu, shell_cmd))
-        return full_command
 
 def get_workload_class(wname):
     return {'quicksort': Quicksort,
